@@ -2,13 +2,12 @@ package com.dragontracker.client.gui;
 
 import com.dragontracker.dragon.DragonDetector;
 import com.dragontracker.dragon.DragonInfo;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.dragontracker.integration.JourneyMapIntegration;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,48 +15,58 @@ import java.util.Map;
 
 public class DragonTrackerScreen extends Screen {
     
-    private static final ResourceLocation BACKGROUND_TEXTURE = 
-        new ResourceLocation("dragontracker", "textures/gui/dragon_tracker_bg.png");
-    
-    private final int imageWidth = 256;
-    private final int imageHeight = 192;
+    private final int PANEL_WIDTH = 400;
+    private final int PANEL_HEIGHT = 300;
     private int leftPos;
     private int topPos;
     
     private List<DragonInfo> dragonList;
     private int selectedDragon = -1;
     private int scrollOffset = 0;
+    private final int MAX_VISIBLE_DRAGONS = 10;
     
     public DragonTrackerScreen() {
         super(Component.translatable("gui.dragontracker.title"));
         refreshDragonList();
+        System.out.println("DragonTrackerScreen constructor called");
     }
     
     @Override
     protected void init() {
-        this.leftPos = (this.width - this.imageWidth) / 2;
-        this.topPos = (this.height - this.imageHeight) / 2;
+        this.leftPos = (this.width - PANEL_WIDTH) / 2;
+        this.topPos = (this.height - PANEL_HEIGHT) / 2;
         
-        // Teleport to dragon button
+        System.out.println("DragonTrackerScreen init() called - creating buttons");
+        
+        // Add waypoint button
         this.addRenderableWidget(Button.builder(
-            Component.literal("Teleport"),
-            button -> teleportToSelected())
-            .bounds(leftPos + 10, topPos + imageHeight - 30, 70, 20)
+            Component.translatable("gui.dragontracker.add_waypoint"),
+            button -> addWaypoint())
+            .bounds(leftPos + 10, topPos + PANEL_HEIGHT - 30, 100, 20)
             .build());
             
         // Toggle highlight button
         this.addRenderableWidget(Button.builder(
             Component.translatable("gui.dragontracker.toggle_highlight"),
             button -> toggleHighlight())
-            .bounds(leftPos + 90, topPos + imageHeight - 30, 80, 20)
+            .bounds(leftPos + 120, topPos + PANEL_HEIGHT - 30, 100, 20)
             .build());
             
         // Refresh button
         this.addRenderableWidget(Button.builder(
             Component.translatable("gui.dragontracker.refresh"),
             button -> refreshDragonList())
-            .bounds(leftPos + imageWidth - 60, topPos + 10, 50, 20)
+            .bounds(leftPos + 230, topPos + PANEL_HEIGHT - 30, 70, 20)
             .build());
+            
+        // Close button
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Close"),
+            button -> this.onClose())
+            .bounds(leftPos + 310, topPos + PANEL_HEIGHT - 30, 80, 20)
+            .build());
+            
+        System.out.println("DragonTrackerScreen buttons created successfully");
     }
     
     private void refreshDragonList() {
@@ -65,23 +74,32 @@ public class DragonTrackerScreen extends Screen {
             Map<Integer, DragonInfo> dragons = DragonDetector.getDetectedDragons();
             this.dragonList = new ArrayList<>(dragons.values());
             this.dragonList.sort((a, b) -> Double.compare(a.getDistance(), b.getDistance()));
+            System.out.println("Dragon list refreshed: " + dragonList.size() + " dragons found");
         } catch (Exception e) {
             this.dragonList = new ArrayList<>();
+            System.err.println("Error refreshing dragon list: " + e.getMessage());
         }
     }
     
-    private void teleportToSelected() {
+    private void addWaypoint() {
         if (selectedDragon >= 0 && selectedDragon < dragonList.size()) {
             DragonInfo dragon = dragonList.get(selectedDragon);
-            // In creative mode or with cheats, you could teleport
-            if (minecraft != null && minecraft.player != null) {
-                minecraft.player.sendSystemMessage(
-                    Component.literal(String.format("Dragon location: %d, %d, %d", 
-                        dragon.getPosition().getX(), 
-                        dragon.getPosition().getY(), 
-                        dragon.getPosition().getZ()))
-                );
+            if (dragon.getEntity() != null) {
+                BlockPos pos = dragon.getPosition();
+                String name = "Dragon " + dragon.getDragonType() + " (" + 
+                             dragon.getGender() + ", Stage " + dragon.getDragonStage() + ")";
+                
+                boolean success = JourneyMapIntegration.addWaypoint(name, pos);
+                String message = success ? "Waypoint added!" : "JourneyMap not available";
+                
+                if (minecraft != null && minecraft.player != null) {
+                    minecraft.player.displayClientMessage(
+                        Component.literal(message), true);
+                }
+                System.out.println(message + " for dragon at " + pos);
             }
+        } else {
+            System.out.println("No dragon selected for waypoint");
         }
     }
     
@@ -89,162 +107,152 @@ public class DragonTrackerScreen extends Screen {
         if (selectedDragon >= 0 && selectedDragon < dragonList.size()) {
             DragonInfo dragon = dragonList.get(selectedDragon);
             DragonDetector.toggleHighlight(dragon.getEntityId());
+            
+            boolean highlighted = DragonDetector.isHighlighted(dragon.getEntityId());
+            String message = highlighted ? "Dragon highlighted" : "Dragon unhighlighted";
+            
+            if (minecraft != null && minecraft.player != null) {
+                minecraft.player.displayClientMessage(
+                    Component.literal(message), true);
+            }
+            System.out.println(message + " for " + dragon.getDragonType() + " dragon");
+        } else {
+            System.out.println("No dragon selected for highlighting");
         }
     }
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // Draw background
         this.renderBackground(graphics);
         
-        try {
-            // Draw background - fallback to solid color if texture missing
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            
-            // Draw simple background rectangle
-            graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF2D2D2D);
-            graphics.fill(leftPos + 2, topPos + 2, leftPos + imageWidth - 2, topPos + imageHeight - 2, 0xFF404040);
-            
-            // Draw title
-            graphics.drawCenteredString(this.font, this.title, 
-                leftPos + imageWidth / 2, topPos + 10, 0xFFFFFF);
-            
-            // Draw dragon list
+        // Draw main panel background
+        graphics.fill(leftPos, topPos, leftPos + PANEL_WIDTH, topPos + PANEL_HEIGHT, 0xCC000000);
+        graphics.fill(leftPos + 1, topPos + 1, leftPos + PANEL_WIDTH - 1, topPos + PANEL_HEIGHT - 1, 0xCC333333);
+        
+        // Draw title
+        graphics.drawCenteredString(this.font, this.title, 
+            leftPos + PANEL_WIDTH / 2, topPos + 10, 0xFFFFFF);
+        
+        // Draw dragon list
+        if (dragonList.isEmpty()) {
+            graphics.drawCenteredString(this.font, 
+                Component.translatable("gui.dragontracker.no_dragons").getString(),
+                leftPos + PANEL_WIDTH / 2, topPos + 50, 0xAAAAAA);
+        } else {
             drawDragonList(graphics, mouseX, mouseY);
-            
-            // Draw selected dragon details
-            if (selectedDragon >= 0 && selectedDragon < dragonList.size()) {
-                drawDragonDetails(graphics, dragonList.get(selectedDragon));
-            }
-        } catch (Exception e) {
-            // Fallback rendering in case of errors
-            graphics.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF000000);
-            graphics.drawCenteredString(this.font, Component.literal("Dragon Tracker"), 
-                leftPos + imageWidth / 2, topPos + imageHeight / 2, 0xFFFFFF);
         }
         
+        // Draw selected dragon details
+        if (selectedDragon >= 0 && selectedDragon < dragonList.size()) {
+            drawDragonDetails(graphics);
+        }
+        
+        // Draw widgets (buttons)
         super.render(graphics, mouseX, mouseY, partialTick);
     }
     
     private void drawDragonList(GuiGraphics graphics, int mouseX, int mouseY) {
         int listX = leftPos + 10;
         int listY = topPos + 30;
-        int listWidth = 120;
-        int listHeight = 120;
+        int listWidth = 180;
+        int itemHeight = 20;
         
         // Draw list background
-        graphics.fill(listX, listY, listX + listWidth, listY + listHeight, 0x80000000);
+        graphics.fill(listX, listY, listX + listWidth, listY + MAX_VISIBLE_DRAGONS * itemHeight, 0x88000000);
         
-        if (dragonList.isEmpty()) {
-            graphics.drawCenteredString(font, Component.literal("No dragons found"), 
-                listX + listWidth / 2, listY + listHeight / 2, 0xAAAAAA);
-            return;
-        }
-        
-        int entryHeight = 15;
-        int maxVisible = listHeight / entryHeight;
-        
-        for (int i = 0; i < Math.min(dragonList.size(), maxVisible); i++) {
+        for (int i = 0; i < Math.min(dragonList.size(), MAX_VISIBLE_DRAGONS); i++) {
             int index = i + scrollOffset;
             if (index >= dragonList.size()) break;
             
             DragonInfo dragon = dragonList.get(index);
-            int entryY = listY + i * entryHeight;
+            int itemY = listY + i * itemHeight;
             
-            // Highlight selected entry
+            // Highlight selected item
             if (index == selectedDragon) {
-                graphics.fill(listX, entryY, listX + listWidth, entryY + entryHeight, 0x80FFFFFF);
+                graphics.fill(listX, itemY, listX + listWidth, itemY + itemHeight, 0x80FFFFFF);
             }
             
-            // Check if mouse is over this entry
-            boolean isHovered = mouseX >= listX && mouseX < listX + listWidth && 
-                              mouseY >= entryY && mouseY < entryY + entryHeight;
-            if (isHovered) {
-                graphics.fill(listX, entryY, listX + listWidth, entryY + entryHeight, 0x40FFFFFF);
+            // Check if mouse is over this item
+            boolean mouseOver = mouseX >= listX && mouseX < listX + listWidth && 
+                              mouseY >= itemY && mouseY < itemY + itemHeight;
+            if (mouseOver && index != selectedDragon) {
+                graphics.fill(listX, itemY, listX + listWidth, itemY + itemHeight, 0x40FFFFFF);
             }
             
             // Draw dragon name and distance
-            String dragonText = String.format("%s %s", 
-                dragon.getDragonType(), dragon.getGender());
-            graphics.drawString(font, dragonText, listX + 2, entryY + 2, 0xFFFFFF);
+            String name = dragon.getDragonType() + " " + dragon.getGender().substring(0, 1);
+            String distance = String.format("%.0fm", dragon.getDistance());
             
-            String distanceText = String.format("%.0fm", dragon.getDistance());
-            graphics.drawString(font, distanceText, listX + 2, entryY + 8, 0xCCCCCC);
+            graphics.drawString(this.font, name, listX + 5, itemY + 6, 0xFFFFFF);
+            graphics.drawString(this.font, distance, listX + listWidth - 50, itemY + 6, 0xAAAAAAA);
         }
     }
     
-    private void drawDragonDetails(GuiGraphics graphics, DragonInfo dragon) {
-        int detailsX = leftPos + 140;
+    private void drawDragonDetails(GuiGraphics graphics) {
+        DragonInfo dragon = dragonList.get(selectedDragon);
+        int detailsX = leftPos + 200;
         int detailsY = topPos + 30;
-        int detailsWidth = 106;
+        int detailsWidth = 190;
+        int detailsHeight = 200;
         
         // Draw details background
-        graphics.fill(detailsX, detailsY, detailsX + detailsWidth, detailsY + 120, 0x80000000);
+        graphics.fill(detailsX, detailsY, detailsX + detailsWidth, detailsY + detailsHeight, 0x88000000);
         
-        int y = detailsY + 5;
+        // Draw details text
+        int textY = detailsY + 10;
         int lineHeight = 12;
         
-        // Dragon name
-        String displayName = dragon.getDisplayName();
-        if (displayName.length() > 15) {
-            displayName = displayName.substring(0, 12) + "...";
-        }
-        graphics.drawString(font, displayName, detailsX + 5, y, 0xFFFFFF);
-        y += lineHeight + 3;
+        graphics.drawString(this.font, "Dragon Details:", detailsX + 10, textY, 0xFFFF00);
+        textY += lineHeight + 5;
         
-        // Type and gender
-        graphics.drawString(font, "Type: " + dragon.getDragonType(), detailsX + 5, y, 0xCCCCCC);
-        y += lineHeight;
-        graphics.drawString(font, "Gender: " + dragon.getGender(), detailsX + 5, y, 0xCCCCCC);
-        y += lineHeight;
+        graphics.drawString(this.font, "Type: " + dragon.getDragonType(), detailsX + 10, textY, 0xFFFFFF);
+        textY += lineHeight;
         
-        // Stage
-        graphics.drawString(font, "Stage: " + dragon.getDragonStage(), detailsX + 5, y, 0xCCCCCC);
-        y += lineHeight;
+        graphics.drawString(this.font, "Gender: " + dragon.getGender(), detailsX + 10, textY, 0xFFFFFF);
+        textY += lineHeight;
         
-        // Status
-        graphics.drawString(font, "Status: " + dragon.getStatusText(), detailsX + 5, y, 0xCCCCCC);
-        y += lineHeight + 3;
+        graphics.drawString(this.font, "Stage: " + dragon.getDragonStage(), detailsX + 10, textY, 0xFFFFFF);
+        textY += lineHeight;
         
-        // Distance
-        graphics.drawString(font, String.format("Distance: %.1fm", dragon.getDistance()), 
-            detailsX + 5, y, 0xFFFFFF);
-        y += lineHeight;
+        graphics.drawString(this.font, String.format("Distance: %.1f blocks", dragon.getDistance()), 
+            detailsX + 10, textY, 0xFFFFFF);
+        textY += lineHeight;
         
-        // Coordinates
-        graphics.drawString(font, String.format("X: %d", dragon.getPosition().getX()), 
-            detailsX + 5, y, 0xCCCCCC);
-        y += lineHeight;
-        graphics.drawString(font, String.format("Y: %d", dragon.getPosition().getY()), 
-            detailsX + 5, y, 0xCCCCCC);
-        y += lineHeight;
-        graphics.drawString(font, String.format("Z: %d", dragon.getPosition().getZ()), 
-            detailsX + 5, y, 0xCCCCCC);
+        BlockPos pos = dragon.getPosition();
+        graphics.drawString(this.font, String.format("Position: %d, %d, %d", pos.getX(), pos.getY(), pos.getZ()), 
+            detailsX + 10, textY, 0xFFFFFF);
+        textY += lineHeight;
         
-        // Highlight status
-        boolean isHighlighted = DragonDetector.isHighlighted(dragon.getEntityId());
-        String highlightText = isHighlighted ? "Highlighted: Yes" : "Highlighted: No";
-        int color = isHighlighted ? 0x00FF00 : 0xFF0000;
-        graphics.drawString(font, highlightText, detailsX + 5, y + lineHeight + 3, color);
+        String status = dragon.isTamed() ? "Tamed" : "Wild";
+        if (dragon.isAsleep()) status += ", Sleeping";
+        graphics.drawString(this.font, "Status: " + status, detailsX + 10, textY, 0xFFFFFF);
+        textY += lineHeight;
+        
+        boolean highlighted = DragonDetector.isHighlighted(dragon.getEntityId());
+        graphics.drawString(this.font, "Highlighted: " + (highlighted ? "Yes" : "No"), 
+            detailsX + 10, textY, highlighted ? 0x00FF00 : 0xFF0000);
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Handle dragon list clicking
+        // Handle dragon list clicks
         int listX = leftPos + 10;
         int listY = topPos + 30;
-        int listWidth = 120;
-        int listHeight = 120;
+        int listWidth = 180;
+        int itemHeight = 20;
         
-        if (mouseX >= listX && mouseX < listX + listWidth && 
-            mouseY >= listY && mouseY < listY + listHeight) {
-            
-            int entryHeight = 15;
-            int clickedIndex = (int) ((mouseY - listY) / entryHeight) + scrollOffset;
-            
-            if (clickedIndex >= 0 && clickedIndex < dragonList.size()) {
-                selectedDragon = clickedIndex;
-                return true;
+        if (mouseX >= listX && mouseX < listX + listWidth) {
+            for (int i = 0; i < Math.min(dragonList.size(), MAX_VISIBLE_DRAGONS); i++) {
+                int itemY = listY + i * itemHeight;
+                if (mouseY >= itemY && mouseY < itemY + itemHeight) {
+                    int index = i + scrollOffset;
+                    if (index < dragonList.size()) {
+                        selectedDragon = index;
+                        System.out.println("Selected dragon: " + dragonList.get(index).getDragonType());
+                        return true;
+                    }
+                }
             }
         }
         
@@ -253,29 +261,22 @@ public class DragonTrackerScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        // Handle scrolling in dragon list
-        int listX = leftPos + 10;
-        int listY = topPos + 30;
-        int listWidth = 120;
-        int listHeight = 120;
-        
-        if (mouseX >= listX && mouseX < listX + listWidth && 
-            mouseY >= listY && mouseY < listY + listHeight) {
-            
-            int maxVisible = listHeight / 15;
-            int maxScroll = Math.max(0, dragonList.size() - maxVisible);
-            
-            scrollOffset -= (int) delta;
-            scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
-            
+        if (dragonList.size() > MAX_VISIBLE_DRAGONS) {
+            scrollOffset = Math.max(0, Math.min(dragonList.size() - MAX_VISIBLE_DRAGONS, 
+                scrollOffset - (int) delta));
             return true;
         }
-        
         return super.mouseScrolled(mouseX, mouseY, delta);
     }
     
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+    
+    @Override
+    public void onClose() {
+        System.out.println("DragonTrackerScreen closing");
+        super.onClose();
     }
 }

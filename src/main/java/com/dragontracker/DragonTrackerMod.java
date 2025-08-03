@@ -2,7 +2,6 @@ package com.dragontracker;
 
 import com.dragontracker.client.KeyBindings;
 import com.dragontracker.client.gui.DragonTrackerScreen;
-import com.dragontracker.client.gui.TestScreen;
 import com.dragontracker.client.renderer.DragonHighlightRenderer;
 import com.dragontracker.config.DragonTrackerConfig;
 import com.dragontracker.dragon.DragonDetector;
@@ -89,9 +88,8 @@ public class DragonTrackerMod {
             while (KeyBindings.OPEN_DRAGON_TRACKER.consumeClick()) {
                 System.out.println("H key pressed - opening Dragon Tracker GUI");
                 if (mc.screen == null) {
-                    // First try simple test screen
-                    mc.setScreen(new TestScreen());
-                    System.out.println("Test GUI opened successfully");
+                    mc.setScreen(new DragonTrackerScreen());
+                    System.out.println("Dragon Tracker GUI opened successfully");
                 } else {
                     System.out.println("Cannot open GUI - another screen is open: " + mc.screen.getClass().getSimpleName());
                 }

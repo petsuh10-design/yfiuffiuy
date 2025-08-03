@@ -34,8 +34,8 @@ public class KeyBindings {
         "key.categories.dragontracker"
     );
     
-    public static void register() {
-        // Key bindings are automatically registered in 1.20.1+ when they're created with KeyMapping
-        // No need for explicit registration
+    public static void init() {
+        // This method is called to ensure the static KeyMappings are initialized
+        System.out.println("Dragon Tracker KeyBindings initialized!");
     }
 }

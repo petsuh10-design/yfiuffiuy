@@ -48,7 +48,6 @@ public class DragonHighlightRenderer {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            RenderSystem.disableTexture();
             RenderSystem.depthMask(false);
             
             Tesselator tesselator = Tesselator.getInstance();
@@ -72,7 +71,6 @@ public class DragonHighlightRenderer {
                 }
             }
             
-            RenderSystem.enableTexture();
             RenderSystem.depthMask(true);
             RenderSystem.disableBlend();
         } catch (Exception e) {

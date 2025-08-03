@@ -8,6 +8,10 @@ version="1.0.0"
 displayName="Dragon Tracker"
 description="Track and locate dragons from Ice and Fire mod with GUI interface and JourneyMap integration"
 authors="DragonTracker Team"
+logoFile="logo.png"
+logoBlur=false
+updateJSONURL=""
+displayURL=""
 
 [[dependencies.dragontracker]]
 modId="forge"

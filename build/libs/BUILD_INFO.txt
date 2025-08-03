@@ -1,0 +1,5 @@
+# DEVELOPMENT BUILD
+This is a development build. For a fully working mod:
+1. Install proper Java development environment
+2. Set up Minecraft Forge MDK
+3. Use './gradlew build' for production build

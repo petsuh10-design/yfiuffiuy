@@ -2,3 +2,5 @@ Manifest-Version: 1.0
 Implementation-Title: Dragon Tracker
 Implementation-Version: 1.0.0
 Implementation-Vendor: Dragon Tracker Team
+Automatic-Module-Name: dragontracker
+FMLModType: MOD

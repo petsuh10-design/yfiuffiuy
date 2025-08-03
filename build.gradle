@@ -31,34 +31,15 @@ minecraft {
                 }
             }
         }
-        
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                dragontracker {
-                    source sourceSets.main
-                }
-            }
-        }
     }
 }
 
 repositories {
     maven { url = 'https://maven.minecraftforge.net' }
-    maven { url = 'https://maven.journeymap.info/maven' }
-    maven { url = 'https://api.modrinth.com/maven' } // For Ice and Fire
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.2.0'
-    
-    // JourneyMap integration
-    compileOnly fg.deobf("info.journeymap:journeymap-api:1.20.1-1.9.7-forge")
-    
-    // Ice and Fire compatibility (optional dependency)
-    compileOnly fg.deobf("maven.modrinth:ice-and-fire-dragons:2.1.13-1.20.1")
 }
 
 jar {

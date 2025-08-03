@@ -3,11 +3,29 @@
     "gui.dragontracker.add_waypoint": "Add Waypoint", 
     "gui.dragontracker.toggle_highlight": "Toggle Highlight",
     "gui.dragontracker.refresh": "Refresh",
+    "gui.dragontracker.no_dragons": "No dragons detected",
+    "gui.dragontracker.distance": "Distance: %s blocks",
+    "gui.dragontracker.type": "Type: %s",
+    "gui.dragontracker.gender": "Gender: %s", 
+    "gui.dragontracker.stage": "Stage: %s",
+    "gui.dragontracker.position": "Position: %d, %d, %d",
+    "gui.dragontracker.status.sleeping": "Sleeping",
+    "gui.dragontracker.status.tamed": "Tamed",
+    "gui.dragontracker.status.wild": "Wild",
+    "gui.dragontracker.waypoint_added": "Waypoint added successfully",
+    "gui.dragontracker.waypoint_failed": "Failed to add waypoint",
     
     "key.categories.dragontracker": "Dragon Tracker",
     "key.dragontracker.open_gui": "Open Dragon Tracker",
     "key.dragontracker.toggle_highlighting": "Toggle Dragon Highlighting",
     "key.dragontracker.quick_waypoint": "Quick Add Waypoint",
+    
+    "message.dragontracker.highlighting_enabled": "Dragon highlighting enabled",
+    "message.dragontracker.highlighting_disabled": "Dragon highlighting disabled",
+    "message.dragontracker.no_dragons_nearby": "No dragons detected nearby",
+    "message.dragontracker.waypoint_added": "Waypoint added for %s dragon",
+    "message.dragontracker.journeymap_unavailable": "JourneyMap not available - waypoint not created",
+    "message.dragontracker.dragon_detected": "Dragon detected: %s",
     
     "dragontracker.config.title": "Dragon Tracker Configuration",
     "dragontracker.config.detectionRange": "Detection Range",
@@ -15,5 +33,15 @@
     "dragontracker.config.enableDistanceDisplay": "Show Distance",
     "dragontracker.config.autoAddToJourneyMap": "Auto Add to JourneyMap",
     "dragontracker.config.updateFrequency": "Update Frequency",
-    "dragontracker.config.enableSoundNotifications": "Sound Notifications"
+    "dragontracker.config.enableSoundNotifications": "Sound Notifications",
+    
+    "dragontracker.type.fire": "Fire",
+    "dragontracker.type.ice": "Ice", 
+    "dragontracker.type.lightning": "Lightning",
+    "dragontracker.type.ender": "Ender",
+    "dragontracker.type.unknown": "Unknown",
+    
+    "dragontracker.gender.male": "Male",
+    "dragontracker.gender.female": "Female",
+    "dragontracker.gender.unknown": "Unknown"
 }

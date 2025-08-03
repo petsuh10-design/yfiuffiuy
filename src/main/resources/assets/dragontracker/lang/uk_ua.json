@@ -3,11 +3,29 @@
     "gui.dragontracker.add_waypoint": "Додати Точку", 
     "gui.dragontracker.toggle_highlight": "Обвести",
     "gui.dragontracker.refresh": "Оновити",
+    "gui.dragontracker.no_dragons": "Драконів не виявлено",
+    "gui.dragontracker.distance": "Відстань: %s блоків",
+    "gui.dragontracker.type": "Тип: %s",
+    "gui.dragontracker.gender": "Стать: %s",
+    "gui.dragontracker.stage": "Стадія: %s",
+    "gui.dragontracker.position": "Позиція: %d, %d, %d",
+    "gui.dragontracker.status.sleeping": "Спить",
+    "gui.dragontracker.status.tamed": "Приручений",
+    "gui.dragontracker.status.wild": "Дикий",
+    "gui.dragontracker.waypoint_added": "Точку успішно додано",
+    "gui.dragontracker.waypoint_failed": "Не вдалося додати точку",
     
     "key.categories.dragontracker": "Трекер Драконів",
     "key.dragontracker.open_gui": "Відкрити Трекер Драконів",
     "key.dragontracker.toggle_highlighting": "Переключити Обведення Драконів",
     "key.dragontracker.quick_waypoint": "Швидко Додати Точку",
+    
+    "message.dragontracker.highlighting_enabled": "Обведення драконів увімкнено",
+    "message.dragontracker.highlighting_disabled": "Обведення драконів вимкнено",
+    "message.dragontracker.no_dragons_nearby": "Поблизу не виявлено драконів",
+    "message.dragontracker.waypoint_added": "Додано точку для %s дракона",
+    "message.dragontracker.journeymap_unavailable": "JourneyMap недоступний - точку не створено",
+    "message.dragontracker.dragon_detected": "Виявлено дракона: %s",
     
     "dragontracker.config.title": "Налаштування Трекера Драконів",
     "dragontracker.config.detectionRange": "Радіус Детекції",
@@ -15,5 +33,15 @@
     "dragontracker.config.enableDistanceDisplay": "Показувати Відстань",
     "dragontracker.config.autoAddToJourneyMap": "Авто Додавання до JourneyMap",
     "dragontracker.config.updateFrequency": "Частота Оновлення",
-    "dragontracker.config.enableSoundNotifications": "Звукові Сповіщення"
+    "dragontracker.config.enableSoundNotifications": "Звукові Сповіщення",
+    
+    "dragontracker.type.fire": "Вогняний",
+    "dragontracker.type.ice": "Крижаний",
+    "dragontracker.type.lightning": "Блискавковий",
+    "dragontracker.type.ender": "Ендер",
+    "dragontracker.type.unknown": "Невідомий",
+    
+    "dragontracker.gender.male": "Самець",
+    "dragontracker.gender.female": "Самка",
+    "dragontracker.gender.unknown": "Невідомо"
 }

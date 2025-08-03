@@ -1,0 +1,19 @@
+{
+    "gui.dragontracker.title": "Dragon Tracker",
+    "gui.dragontracker.add_waypoint": "Add Waypoint", 
+    "gui.dragontracker.toggle_highlight": "Toggle Highlight",
+    "gui.dragontracker.refresh": "Refresh",
+    
+    "key.categories.dragontracker": "Dragon Tracker",
+    "key.dragontracker.open_gui": "Open Dragon Tracker",
+    "key.dragontracker.toggle_highlighting": "Toggle Dragon Highlighting",
+    "key.dragontracker.quick_waypoint": "Quick Add Waypoint",
+    
+    "dragontracker.config.title": "Dragon Tracker Configuration",
+    "dragontracker.config.detectionRange": "Detection Range",
+    "dragontracker.config.enableHighlighting": "Enable Highlighting",
+    "dragontracker.config.enableDistanceDisplay": "Show Distance",
+    "dragontracker.config.autoAddToJourneyMap": "Auto Add to JourneyMap",
+    "dragontracker.config.updateFrequency": "Update Frequency",
+    "dragontracker.config.enableSoundNotifications": "Sound Notifications"
+}

@@ -1,0 +1,19 @@
+{
+    "gui.dragontracker.title": "Трекер Драконів",
+    "gui.dragontracker.add_waypoint": "Додати Точку", 
+    "gui.dragontracker.toggle_highlight": "Обвести",
+    "gui.dragontracker.refresh": "Оновити",
+    
+    "key.categories.dragontracker": "Трекер Драконів",
+    "key.dragontracker.open_gui": "Відкрити Трекер Драконів",
+    "key.dragontracker.toggle_highlighting": "Переключити Обведення Драконів",
+    "key.dragontracker.quick_waypoint": "Швидко Додати Точку",
+    
+    "dragontracker.config.title": "Налаштування Трекера Драконів",
+    "dragontracker.config.detectionRange": "Радіус Детекції",
+    "dragontracker.config.enableHighlighting": "Увімкнути Обведення",
+    "dragontracker.config.enableDistanceDisplay": "Показувати Відстань",
+    "dragontracker.config.autoAddToJourneyMap": "Авто Додавання до JourneyMap",
+    "dragontracker.config.updateFrequency": "Частота Оновлення",
+    "dragontracker.config.enableSoundNotifications": "Звукові Сповіщення"
+}

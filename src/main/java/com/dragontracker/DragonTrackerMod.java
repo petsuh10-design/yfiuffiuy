@@ -2,6 +2,7 @@ package com.dragontracker;
 
 import com.dragontracker.client.KeyBindings;
 import com.dragontracker.client.gui.DragonTrackerScreen;
+import com.dragontracker.client.gui.SimpleTestScreen;
 import com.dragontracker.client.renderer.DragonHighlightRenderer;
 import com.dragontracker.config.DragonTrackerConfig;
 import com.dragontracker.dragon.DragonDetector;
@@ -19,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
@@ -54,65 +56,146 @@ public class DragonTrackerMod {
     }
     
     private void clientSetup(final FMLClientSetupEvent event) {
+        System.out.println("=== CLIENT SETUP EVENT ===");
+        
         // Initialize client-side components
         MinecraftForge.EVENT_BUS.register(new DragonHighlightRenderer());
         
+        // Діагностика keybindings
+        System.out.println("Checking keybindings in client setup:");
+        try {
+            System.out.println("OPEN_DRAGON_TRACKER exists: " + (KeyBindings.OPEN_DRAGON_TRACKER != null));
+            System.out.println("OPEN_DRAGON_TRACKER key: " + KeyBindings.OPEN_DRAGON_TRACKER.getKey().getName());
+            System.out.println("OPEN_DRAGON_TRACKER category: " + KeyBindings.OPEN_DRAGON_TRACKER.getCategory());
+        } catch (Exception e) {
+            System.out.println("ERROR accessing keybindings in client setup: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
         System.out.println("Dragon Tracker Client setup complete!");
+        System.out.println("=========================");
     }
     
     private void registerKeyBindings(RegisterKeyMappingsEvent event) {
-        event.register(KeyBindings.OPEN_DRAGON_TRACKER);
-        event.register(KeyBindings.TOGGLE_HIGHLIGHTING);
-        event.register(KeyBindings.QUICK_ADD_WAYPOINT);
+        System.out.println("=== REGISTERING KEYBINDINGS ===");
         
-        System.out.println("Dragon Tracker keybindings registered: H, J, K");
+        try {
+            System.out.println("Registering OPEN_DRAGON_TRACKER...");
+            event.register(KeyBindings.OPEN_DRAGON_TRACKER);
+            System.out.println("OPEN_DRAGON_TRACKER registered successfully");
+            
+            System.out.println("Registering TOGGLE_HIGHLIGHTING...");
+            event.register(KeyBindings.TOGGLE_HIGHLIGHTING);
+            System.out.println("TOGGLE_HIGHLIGHTING registered successfully");
+            
+            System.out.println("Registering QUICK_ADD_WAYPOINT...");
+            event.register(KeyBindings.QUICK_ADD_WAYPOINT);
+            System.out.println("QUICK_ADD_WAYPOINT registered successfully");
+            
+            System.out.println("All Dragon Tracker keybindings registered: H, J, K");
+            
+            // Перевірка після реєстрації
+            System.out.println("Post-registration check:");
+            System.out.println("H key: " + KeyBindings.OPEN_DRAGON_TRACKER.getKey().getName());
+            System.out.println("J key: " + KeyBindings.TOGGLE_HIGHLIGHTING.getKey().getName());
+            System.out.println("K key: " + KeyBindings.QUICK_ADD_WAYPOINT.getKey().getName());
+            
+        } catch (Exception e) {
+            System.out.println("ERROR during keybinding registration: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        System.out.println("==============================");
     }
     
     @SubscribeEvent
-    public void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && FMLEnvironment.dist == Dist.CLIENT) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
             Minecraft mc = Minecraft.getInstance();
+            
+            // Діагностика стану гри
             if (mc.level != null && mc.player != null) {
-                // Update dragon detection system
-                DragonDetector.tick();
-                
-                // Handle key presses
-                handleKeyPresses(mc);
-            }
-        }
-    }
-    
-    private void handleKeyPresses(Minecraft mc) {
-        try {
-            // Open GUI with H key
-            while (KeyBindings.OPEN_DRAGON_TRACKER.consumeClick()) {
-                System.out.println("H key pressed - opening Dragon Tracker GUI");
-                if (mc.screen == null) {
-                    mc.setScreen(new DragonTrackerScreen());
-                    System.out.println("Dragon Tracker GUI opened successfully");
-                } else {
-                    System.out.println("Cannot open GUI - another screen is open: " + mc.screen.getClass().getSimpleName());
+                // Перевіряємо стан keybindings кожні 60 тиків (3 секунди)
+                if (mc.level.getGameTime() % 60 == 0) {
+                    System.out.println("=== KEYBINDING STATUS CHECK ===");
+                    System.out.println("OPEN_DRAGON_TRACKER key: " + KeyBindings.OPEN_DRAGON_TRACKER.getKey().getName());
+                    System.out.println("OPEN_DRAGON_TRACKER mapping: " + KeyBindings.OPEN_DRAGON_TRACKER.getDefaultKey().getName());
+                    System.out.println("Current screen: " + (mc.screen != null ? mc.screen.getClass().getSimpleName() : "null"));
+                    System.out.println("Player in game: " + (mc.player != null));
+                    System.out.println("Level loaded: " + (mc.level != null));
+                    System.out.println("===============================");
                 }
             }
             
-            // Toggle highlighting with J key
-            while (KeyBindings.TOGGLE_HIGHLIGHTING.consumeClick()) {
-                System.out.println("J key pressed - toggling highlighting");
-                toggleAllHighlighting();
-            }
-            
-            // Quick add waypoint with K key
-            while (KeyBindings.QUICK_ADD_WAYPOINT.consumeClick()) {
-                System.out.println("K key pressed - adding waypoint");
-                addNearestDragonWaypoint();
-            }
-        } catch (Exception e) {
-            System.err.println("Error handling key presses: " + e.getMessage());
-            e.printStackTrace();
+            DragonDetector.tick();
+            handleKeyPresses(mc);
         }
     }
+
+    private static void handleKeyPresses(Minecraft mc) {
+        System.out.println("=== HANDLE KEY PRESSES START ===");
+        System.out.println("Current time: " + System.currentTimeMillis());
+        System.out.println("Screen state: " + (mc.screen != null ? mc.screen.getClass().getSimpleName() : "null"));
+        
+        // Перевіряємо стан всіх наших клавіш
+        System.out.println("Checking OPEN_DRAGON_TRACKER...");
+        if (KeyBindings.OPEN_DRAGON_TRACKER.isDown()) {
+            System.out.println("H key is being held down!");
+        }
+        
+        int clickCount = 0;
+        while (KeyBindings.OPEN_DRAGON_TRACKER.consumeClick()) {
+            clickCount++;
+            System.out.println("H key click consumed #" + clickCount);
+            System.out.println("Player state: " + (mc.player != null ? "alive" : "null"));
+            System.out.println("Level state: " + (mc.level != null ? "loaded" : "null"));
+            System.out.println("Current screen before: " + (mc.screen != null ? mc.screen.getClass().getSimpleName() : "null"));
+            
+            if (mc.screen == null) {
+                                 System.out.println("Attempting to open SIMPLE TEST GUI...");
+                 try {
+                     SimpleTestScreen screen = new SimpleTestScreen();
+                     System.out.println("SimpleTestScreen created successfully");
+                     mc.setScreen(screen);
+                     System.out.println("mc.setScreen() called successfully");
+                     System.out.println("Current screen after: " + (mc.screen != null ? mc.screen.getClass().getSimpleName() : "null"));
+                } catch (Exception e) {
+                    System.out.println("ERROR creating/setting Dragon Tracker GUI: " + e.getMessage());
+                    e.printStackTrace();
+                    
+                    // Fallback - пробуємо відкрити базовий меню інвентаря як тест
+                    System.out.println("Trying fallback - opening inventory as test...");
+                    try {
+                        mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
+                        System.out.println("Fallback inventory opened successfully!");
+                    } catch (Exception e2) {
+                        System.out.println("ERROR even with fallback inventory: " + e2.getMessage());
+                    }
+                }
+            } else {
+                System.out.println("Cannot open GUI - another screen is open: " + mc.screen.getClass().getSimpleName());
+            }
+        }
+        
+        if (clickCount > 0) {
+            System.out.println("Total H key clicks processed: " + clickCount);
+        }
+
+        // Діагностика інших клавіш
+        while (KeyBindings.TOGGLE_HIGHLIGHTING.consumeClick()) {
+            System.out.println("J key pressed - toggling highlighting");
+            toggleAllHighlighting();
+        }
+
+        while (KeyBindings.QUICK_ADD_WAYPOINT.consumeClick()) {
+            System.out.println("K key pressed - adding waypoint");
+            addNearestDragonWaypoint();
+        }
+        
+        System.out.println("=== HANDLE KEY PRESSES END ===");
+    }
     
-    private void toggleAllHighlighting() {
+    private static void toggleAllHighlighting() {
         var dragons = DragonDetector.getDetectedDragons();
         boolean anyHighlighted = dragons.keySet().stream()
             .anyMatch(DragonDetector::isHighlighted);
@@ -134,7 +217,7 @@ public class DragonTrackerMod {
         System.out.println(message);
     }
     
-    private void addNearestDragonWaypoint() {
+    private static void addNearestDragonWaypoint() {
         var dragons = DragonDetector.getDetectedDragons();
         if (dragons.isEmpty()) {
             String message = "No dragons detected nearby";
